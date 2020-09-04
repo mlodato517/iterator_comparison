@@ -1,6 +1,26 @@
 const { performance } = require("perf_hooks");
 
-let nums = Array.from(Array(100000), (_, i) => i);
+function multipleFiltersInline(nums) {
+  return nums
+    .filter((n) => n % 3 === 0)
+    .filter((n) => n % 5 === 0)
+    .filter((n) => n % 7 === 0)
+    .filter((n) => n % 11 === 0);
+}
+
+const singleFilterInline = (nums) =>
+  nums.filter((n) => n % 3 === 0 && n % 5 === 0 && n % 7 === 0 && n % 11 === 0);
+
+function singleLoopFilterInline(nums) {
+  let returnValue = [];
+  for (let i = 0; i < nums.length; i++) {
+    const n = nums[i];
+    if (n % 3 === 0 && n % 5 === 0 && n % 7 === 0 && n % 11 === 0) {
+      returnValue.push(n);
+    }
+  }
+  return returnValue;
+}
 
 const divisibleBy3 = (n) => n % 3 === 0;
 const divisibleBy5 = (n) => n % 5 === 0;
@@ -29,9 +49,24 @@ function singleLoopFilter(nums) {
   return returnValue;
 }
 
-console.log(multipleFilters([11 * 7 * 5 * 3, 1]));
-console.log(singleFilter([11 * 7 * 5 * 3, 1]));
-console.log(singleLoopFilter([11 * 7 * 5 * 3, 1]));
+function testFunc(method) {
+  const smallNums = Array.from(Array(3000), (_, i) => i + 1);
+  const result = method(smallNums);
+  return result.length === 2 && result[0] === 1155 && result[1] === 2310;
+}
+
+if (
+  !testFunc(multipleFilters) ||
+  !testFunc(singleFilter) ||
+  !testFunc(singleLoopFilter) ||
+  !testFunc(multipleFiltersInline) ||
+  !testFunc(singleFilterInline) ||
+  !testFunc(singleLoopFilterInline)
+) {
+  throw new Error("One of these is wrong!");
+}
+
+let nums = Array.from(Array(100000), (_, i) => i + 1);
 
 function timeMethod(method) {
   for (let i = 0; i < 1000; i++) {
@@ -56,11 +91,22 @@ function weighMethod(method) {
   return newHeap - heapBase;
 }
 
+console.log("Times (sec):\n");
 console.log({
   multipleTime: timeMethod(multipleFilters),
   singleTime: timeMethod(singleFilter),
   singleLoopTime: timeMethod(singleLoopFilter),
+  multipleInlineTime: timeMethod(multipleFiltersInline),
+  singleInlineTime: timeMethod(singleFilterInline),
+  singleLoopInlineTime: timeMethod(singleLoopFilterInline),
+});
+
+console.log("\nWeights (bytes):\n");
+console.log({
   multipleWeight: weighMethod(multipleFilters),
   singleWeight: weighMethod(singleFilter),
   singleLoopWeight: weighMethod(singleLoopFilter),
+  multipleInlineWeight: weighMethod(multipleFiltersInline),
+  singleInlineWeight: weighMethod(singleFilterInline),
+  singleLoopInlineWeight: weighMethod(singleLoopFilterInline),
 });

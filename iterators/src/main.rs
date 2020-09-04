@@ -30,25 +30,37 @@ fn main() {
     let multiple_time = time_function(&nums, multiple_filters);
     let single_time = time_function(&nums, single_filter);
     let single_loop_time = time_function(&nums, single_loop_filter);
+    let multiple_inline_time = time_function(&nums, multiple_filters_inline);
+    let single_inline_time = time_function(&nums, single_filter_inline);
+    let single_loop_inline_time = time_function(&nums, single_loop_filter_inline);
 
-    println!(
-        "Times:\nMultiple filters: {}s\nSingle filter: {}s\nSingle loop: {}s",
-        multiple_time, single_time, single_loop_time
-    );
+    println!("Times (sec):");
+    println!("{0: <20}{1:}", "Multiple:", multiple_time);
+    println!("{0: <20}{1:}", "Single:", single_time);
+    println!("{0: <20}{1:}", "Loop:", single_loop_time);
+    println!("{0: <20}{1:}", "Multiple Inline:", multiple_inline_time);
+    println!("{0: <20}{1:}", "Single Inline:", single_inline_time);
+    println!("{0: <20}{1:}", "Loop Inline:", single_loop_inline_time);
 
     let multiple_weight = weigh_function(&nums, multiple_filters);
     let single_weight = weigh_function(&nums, single_filter);
     let single_loop_weight = weigh_function(&nums, single_loop_filter);
+    let multiple_inline_weight = weigh_function(&nums, multiple_filters_inline);
+    let single_inline_weight = weigh_function(&nums, single_filter_inline);
+    let single_loop_inline_weight = weigh_function(&nums, single_loop_filter_inline);
 
-    println!(
-        "\nWeights:\nMultiple filters: {}\nSingle filter: {}\nSingle loop: {}",
-        multiple_weight, single_weight, single_loop_weight
-    );
+    println!("\nWeights (bytes):");
+    println!("{0: <20}{1:}", "Multiple:", multiple_weight);
+    println!("{0: <20}{1:}", "Single:", single_weight);
+    println!("{0: <20}{1:}", "Loop:", single_loop_weight);
+    println!("{0: <20}{1:}", "Multiple Inline:", multiple_inline_weight);
+    println!("{0: <20}{1:}", "Single Inline:", single_inline_weight);
+    println!("{0: <20}{1:}", "Loop Inline:", single_loop_inline_weight);
 }
 
 type Func = fn(args: &[u64]) -> Vec<u64>;
 fn time_function(nums: &[u64], f: Func) -> f64 {
-    for _ in 0..10 {
+    for _ in 0..1_000 {
         let _ = f(nums);
     }
     let start = Instant::now();
