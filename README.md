@@ -179,6 +179,20 @@ But again, in case you just skipped to this section, these microbenchmarks are:
    may be completely biased based on how inputs were defined and what the
    runtime/interpreter/compiler optimized.
 
+## Open Questions
+
+1. I would expect the "loop" versions of all these languages to allocate _roughly_ the
+   the same amount. Why does rust allocate 262k bytes while ruby allocates 134k bytes
+   and js allocates 383k bytes. Did I do the GC wrong? Is it differences in the sizes of
+   each number type?
+2. I would expect the memory allocated in the rust version to roubly equal
+   `capacity-of-final-vector * size-of-u64`. Checking the capacity I see space
+   allocated for 16384 items. Since each element is 8 bytes I would expect
+   `131072 bytes` or thereabouts but it looks to be allocating nearly exactly double.
+3. Why are `for` loops so much faster in JS? Is the benchmark incorrect?
+4. Why is `.reduce` similar in performance to `.filter.map.filter` in ruby when it
+   allocates so much less?
+
 ## Contributing
 
 Feel free to contribute to any of the existing benchmarks and/or
