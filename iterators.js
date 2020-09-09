@@ -1,67 +1,92 @@
 const { performance } = require("perf_hooks");
 
-function multipleFiltersInline(nums) {
-  return nums
-    .filter((n) => n % 3 === 0)
-    .filter((n) => n % 5 === 0)
-    .filter((n) => n % 7 === 0)
-    .filter((n) => n % 11 === 0);
+if (!global.gc) {
+  throw new Error(
+    "Need to execute Node with --expose-gc. Ex: `node --expose-gc iterators.js`"
+  );
 }
 
-const singleFilterInline = (nums) =>
-  nums.filter((n) => n % 3 === 0 && n % 5 === 0 && n % 7 === 0 && n % 11 === 0);
+const filterMapFilterInline = (nums) =>
+  nums
+    .filter((n) => n % 3 == 0)
+    .map((n) => n & (255 << 8))
+    .filter((n) => n % 3 == 0);
 
-function singleLoopFilterInline(nums) {
-  let returnValue = [];
+const reduceInline = (nums) =>
+  nums.reduce((result, n) => {
+    if (n % 3 == 0) {
+      const highBits = n & (255 << 8);
+      if (highBits % 3 == 0) {
+        result.push(highBits);
+      }
+    }
+    return result;
+  }, []);
+
+const forLoopInline = (nums) => {
+  const result = [];
   for (let i = 0; i < nums.length; i++) {
-    const n = nums[i];
-    if (n % 3 === 0 && n % 5 === 0 && n % 7 === 0 && n % 11 === 0) {
-      returnValue.push(n);
+    n = nums[i];
+    if (n % 3 == 0) {
+      const highBits = n & (255 << 8);
+      if (highBits % 3 == 0) {
+        result.push(highBits);
+      }
     }
   }
-  return returnValue;
-}
+  return result;
+};
 
 const divisibleBy3 = (n) => n % 3 === 0;
-const divisibleBy5 = (n) => n % 5 === 0;
-const divisibleBy7 = (n) => n % 7 === 0;
-const divisibleBy11 = (n) => n % 11 === 0;
-const divisibleBy1155 = (n) =>
-  divisibleBy3(n) && divisibleBy5(n) && divisibleBy7(n) && divisibleBy11(n);
+const secondByte = (n) => n & (255 << 8);
 
-function multipleFilters(nums) {
-  return nums
-    .filter(divisibleBy3)
-    .filter(divisibleBy5)
-    .filter(divisibleBy7)
-    .filter(divisibleBy11);
-}
+const filterMapFilterCallback = (nums) =>
+  nums.filter(divisibleBy3).map(secondByte).filter(divisibleBy3);
 
-const singleFilter = (nums) => nums.filter(divisibleBy1155);
+const reduceCallback = (nums) =>
+  nums.reduce((result, n) => {
+    if (divisibleBy3(n)) {
+      const highBits = secondByte(n);
+      if (divisibleBy3(highBits)) {
+        result.push(highBits);
+      }
+    }
+    return result;
+  }, []);
 
-function singleLoopFilter(nums) {
-  let returnValue = [];
+const forLoopCallback = (nums) => {
+  const result = [];
   for (let i = 0; i < nums.length; i++) {
-    if (divisibleBy1155(nums[i])) {
-      returnValue.push(nums[i]);
+    n = nums[i];
+    if (divisibleBy3(n)) {
+      const highBits = secondByte(n);
+      if (divisibleBy3(highBits)) {
+        result.push(highBits);
+      }
     }
   }
-  return returnValue;
-}
+  return result;
+};
 
 function testFunc(method) {
-  const smallNums = Array.from(Array(3000), (_, i) => i + 1);
+  const smallNums = [0, (3 << 8) | 3, (4 << 8) | 3, (3 << 8) | 4, (6 << 8) | 3];
   const result = method(smallNums);
-  return result.length === 2 && result[0] === 1155 && result[1] === 2310;
+
+  return (
+    result.length === 3 &&
+    result[0] === 0 &&
+    result[1] === 3 << 8 &&
+    result[2] === 6 << 8
+  );
 }
 
 if (
-  !testFunc(multipleFilters) ||
-  !testFunc(singleFilter) ||
-  !testFunc(singleLoopFilter) ||
-  !testFunc(multipleFiltersInline) ||
-  !testFunc(singleFilterInline) ||
-  !testFunc(singleLoopFilterInline)
+  !testFunc(filterMapFilterInline) ||
+  !testFunc(reduceInline) ||
+  !testFunc(forLoopInline) ||
+  !testFunc(filterMapFilterCallback) ||
+  !testFunc(reduceCallback) ||
+  !testFunc(forLoopCallback)
 ) {
   throw new Error("One of these is wrong!");
 }
@@ -73,6 +98,7 @@ function timeMethod(method) {
     method(nums);
   }
 
+  global.gc();
   let start = performance.now();
   const output = method(nums);
   let end = performance.now();
@@ -83,6 +109,7 @@ function timeMethod(method) {
 }
 
 function weighMethod(method) {
+  global.gc();
   const heapBase = process.memoryUsage().heapUsed;
   const output = method(nums);
   const newHeap = process.memoryUsage().heapUsed;
@@ -91,22 +118,72 @@ function weighMethod(method) {
   return newHeap - heapBase;
 }
 
-console.log("Times (sec):\n");
-console.log({
-  multipleTime: timeMethod(multipleFilters),
-  singleTime: timeMethod(singleFilter),
-  singleLoopTime: timeMethod(singleLoopFilter),
-  multipleInlineTime: timeMethod(multipleFiltersInline),
-  singleInlineTime: timeMethod(singleFilterInline),
-  singleLoopInlineTime: timeMethod(singleLoopFilterInline),
-});
+const filterMapFilterInlineTime = timeMethod(filterMapFilterInline);
+const reduceInlineTime = timeMethod(reduceInline);
+const forLoopInlineTime = timeMethod(forLoopInline);
 
-console.log("\nWeights (bytes):\n");
-console.log({
-  multipleWeight: weighMethod(multipleFilters),
-  singleWeight: weighMethod(singleFilter),
-  singleLoopWeight: weighMethod(singleLoopFilter),
-  multipleInlineWeight: weighMethod(multipleFiltersInline),
-  singleInlineWeight: weighMethod(singleFilterInline),
-  singleLoopInlineWeight: weighMethod(singleLoopFilterInline),
-});
+const filterMapFilterCallbackTime = timeMethod(filterMapFilterCallback);
+const reduceCallbackTime = timeMethod(reduceCallback);
+const forLoopCallbackTime = timeMethod(forLoopCallback);
+
+const filterMapFilterInlineWeight = weighMethod(filterMapFilterInline);
+const reduceInlineWeight = weighMethod(reduceInline);
+const forLoopInlineWeight = weighMethod(forLoopInline);
+
+const filterMapFilterCallbackWeight = weighMethod(filterMapFilterCallback);
+const reduceCallbackWeight = weighMethod(reduceCallback);
+const forLoopCallbackWeight = weighMethod(forLoopCallback);
+
+console.table([
+  {
+    title: "runtime of filter-map-filter with inline functions",
+    "time in sec": filterMapFilterInlineTime,
+  },
+  {
+    title: "runtime of reduce with inline functions",
+    "time in sec": reduceInlineTime,
+  },
+  {
+    title: "runtime of for-loop with inline functions",
+    "time in sec": forLoopInlineTime,
+  },
+  {
+    title: "runtime of filter-map-filter with callbacks",
+    "time in sec": filterMapFilterCallbackTime,
+  },
+  {
+    title: "runtime of reduce with callbacks",
+    "time in sec": reduceCallbackTime,
+  },
+  {
+    title: "runtime of for-loop with callbacks",
+    "time in sec": forLoopCallbackTime,
+  },
+]);
+
+console.table([
+  {
+    title: "weight of filter-map-filter with inline functions",
+    "bytes allocated": filterMapFilterInlineWeight,
+  },
+  {
+    title: "weight of reduce with inline functions",
+    "bytes allocated": reduceInlineWeight,
+  },
+  {
+    title: "weight of for-loop with inline functions",
+    "bytes allocated": forLoopInlineWeight,
+  },
+  {
+    title: "weight of filter-map-filter with callbacks",
+    "bytes allocated": filterMapFilterCallbackWeight,
+  },
+  {
+    title: "weight of reduce with callbacks",
+    "bytes allocated": reduceCallbackWeight,
+  },
+  {
+    title: "weight of for-loop with callbacks",
+    "bytes allocated": forLoopCallbackWeight,
+  },
+]);

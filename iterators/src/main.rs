@@ -27,12 +27,12 @@ static A: Counter = Counter;
 fn main() {
     let nums: Vec<u64> = (0..100_000).collect();
 
-    let multiple_time = time_function(&nums, multiple_filters);
-    let single_time = time_function(&nums, single_filter);
-    let single_loop_time = time_function(&nums, single_loop_filter);
-    let multiple_inline_time = time_function(&nums, multiple_filters_inline);
-    let single_inline_time = time_function(&nums, single_filter_inline);
-    let single_loop_inline_time = time_function(&nums, single_loop_filter_inline);
+    let multiple_time = time_function(&nums, filter_map_filter_callback);
+    let single_time = time_function(&nums, fold_callback);
+    let single_loop_time = time_function(&nums, for_loop_callback);
+    let multiple_inline_time = time_function(&nums, filter_map_filter_inline);
+    let single_inline_time = time_function(&nums, fold_inline);
+    let single_loop_inline_time = time_function(&nums, for_loop_inline);
 
     println!("Times (sec):");
     println!("{0: <20}{1:}", "Multiple:", multiple_time);
@@ -42,12 +42,12 @@ fn main() {
     println!("{0: <20}{1:}", "Single Inline:", single_inline_time);
     println!("{0: <20}{1:}", "Loop Inline:", single_loop_inline_time);
 
-    let multiple_weight = weigh_function(&nums, multiple_filters);
-    let single_weight = weigh_function(&nums, single_filter);
-    let single_loop_weight = weigh_function(&nums, single_loop_filter);
-    let multiple_inline_weight = weigh_function(&nums, multiple_filters_inline);
-    let single_inline_weight = weigh_function(&nums, single_filter_inline);
-    let single_loop_inline_weight = weigh_function(&nums, single_loop_filter_inline);
+    let multiple_weight = weigh_function(&nums, filter_map_filter_callback);
+    let single_weight = weigh_function(&nums, fold_callback);
+    let single_loop_weight = weigh_function(&nums, for_loop_callback);
+    let multiple_inline_weight = weigh_function(&nums, filter_map_filter_inline);
+    let single_inline_weight = weigh_function(&nums, fold_inline);
+    let single_loop_inline_weight = weigh_function(&nums, for_loop_inline);
 
     println!("\nWeights (bytes):");
     println!("{0: <20}{1:}", "Multiple:", multiple_weight);

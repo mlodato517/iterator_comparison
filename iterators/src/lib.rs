@@ -1,71 +1,74 @@
-pub fn multiple_filters_inline(nums: &[u64]) -> Vec<u64> {
+pub fn filter_map_filter_inline(nums: &[u64]) -> Vec<u64> {
     nums.iter()
         .filter(|&&n| n % 3 == 0)
-        .filter(|&&n| n % 5 == 0)
-        .filter(|&&n| n % 7 == 0)
-        .filter(|&&n| n % 11 == 0)
-        .copied()
+        .map(|&n| n & (255 << 8))
+        .filter(|&n| n % 3 == 0)
         .collect()
 }
 
-pub fn single_filter_inline(nums: &[u64]) -> Vec<u64> {
-    nums.iter()
-        .filter(|&&n| n % 3 == 0 && n % 5 == 0 && n % 7 == 0 && n % 11 == 0)
-        .copied()
-        .collect()
+pub fn fold_inline(nums: &[u64]) -> Vec<u64> {
+    nums.iter().fold(Vec::new(), |mut result, &n| {
+        if n % 3 == 0 {
+            let high_bits = n & (255 << 8);
+            if high_bits % 3 == 0 {
+                result.push(high_bits);
+            }
+        }
+        result
+    })
 }
 
-pub fn single_loop_filter_inline(nums: &[u64]) -> Vec<u64> {
-    let mut return_value = Vec::new();
+pub fn for_loop_inline(nums: &[u64]) -> Vec<u64> {
+    let mut result = Vec::new();
     for n in nums {
-        if n % 3 == 0 && n % 5 == 0 && n % 7 == 0 && n % 11 == 0 {
-            return_value.push(*n);
+        if n % 3 == 0 {
+            let high_bits = n & (255 << 8);
+            if high_bits % 3 == 0 {
+                result.push(high_bits);
+            }
         }
     }
-    return_value
+    result
 }
 
 fn divisible_by_3(n: u64) -> bool {
     n % 3 == 0
 }
-fn divisible_by_5(n: u64) -> bool {
-    n % 5 == 0
-}
-fn divisible_by_7(n: u64) -> bool {
-    n % 7 == 0
-}
-fn divisible_by_11(n: u64) -> bool {
-    n % 11 == 0
-}
-fn divisible_by_1155(n: u64) -> bool {
-    divisible_by_3(n) && divisible_by_5(n) && divisible_by_7(n) && divisible_by_11(n)
+fn second_byte(n: u64) -> u64 {
+    n & (255 << 8)
 }
 
-pub fn multiple_filters(nums: &[u64]) -> Vec<u64> {
+pub fn filter_map_filter_callback(nums: &[u64]) -> Vec<u64> {
     nums.iter()
         .filter(|&&n| divisible_by_3(n))
-        .filter(|&&n| divisible_by_5(n))
-        .filter(|&&n| divisible_by_7(n))
-        .filter(|&&n| divisible_by_11(n))
-        .copied()
+        .map(|&n| second_byte(n))
+        .filter(|&n| divisible_by_3(n))
         .collect()
 }
 
-pub fn single_filter(nums: &[u64]) -> Vec<u64> {
-    nums.iter()
-        .filter(|&&n| divisible_by_1155(n))
-        .copied()
-        .collect()
+pub fn fold_callback(nums: &[u64]) -> Vec<u64> {
+    nums.iter().fold(Vec::new(), |mut result, &n| {
+        if divisible_by_3(n) {
+            let high_bits = second_byte(n);
+            if divisible_by_3(high_bits) {
+                result.push(high_bits);
+            }
+        }
+        result
+    })
 }
 
-pub fn single_loop_filter(nums: &[u64]) -> Vec<u64> {
-    let mut return_value = Vec::new();
+pub fn for_loop_callback(nums: &[u64]) -> Vec<u64> {
+    let mut result = Vec::new();
     for &n in nums {
-        if divisible_by_1155(n) {
-            return_value.push(n);
+        if divisible_by_3(n) {
+            let high_bits = second_byte(n);
+            if divisible_by_3(high_bits) {
+                result.push(high_bits);
+            }
         }
     }
-    return_value
+    result
 }
 
 #[cfg(test)]
@@ -73,49 +76,56 @@ mod tests {
     use super::*;
 
     #[test]
-    fn multiple_works() {
-        assert_eq!(multiple_filters(&[1155, 1]), vec![1155])
+    fn filter_map_filter_callback_works() {
+        assert_eq!(
+            filter_map_filter_callback(&[
+                0,
+                (3 << 8) | 3,
+                (4 << 8) | 3,
+                (3 << 8) | 4,
+                (6 << 8) | 3
+            ]),
+            vec![0, 3 << 8, 6 << 8]
+        )
     }
 
     #[test]
-    fn single_works() {
-        assert_eq!(single_filter(&[1155, 1]), vec![1155])
+    fn fold_callback_works() {
+        assert_eq!(
+            fold_callback(&[0, (3 << 8) | 3, (4 << 8) | 3, (3 << 8) | 4, (6 << 8) | 3]),
+            vec![0, 3 << 8, 6 << 8]
+        )
     }
 
     #[test]
     fn single_loop_works() {
-        assert_eq!(single_loop_filter(&[1155, 1]), vec![1155])
+        assert_eq!(
+            for_loop_callback(&[0, (3 << 8) | 3, (4 << 8) | 3, (3 << 8) | 4, (6 << 8) | 3]),
+            vec![0, 3 << 8, 6 << 8]
+        )
     }
 
     #[test]
     fn multiple_inline_works() {
-        assert_eq!(multiple_filters_inline(&[1155, 1]), vec![1155])
+        assert_eq!(
+            filter_map_filter_inline(&[0, (3 << 8) | 3, (4 << 8) | 3, (3 << 8) | 4, (6 << 8) | 3]),
+            vec![0, 3 << 8, 6 << 8]
+        )
     }
 
     #[test]
     fn single_inline_works() {
-        assert_eq!(single_filter_inline(&[1155, 1]), vec![1155])
+        assert_eq!(
+            fold_inline(&[0, (3 << 8) | 3, (4 << 8) | 3, (3 << 8) | 4, (6 << 8) | 3]),
+            vec![0, 3 << 8, 6 << 8]
+        )
     }
 
     #[test]
     fn single_loop_inline_works() {
-        assert_eq!(single_loop_filter_inline(&[1155, 1]), vec![1155])
-    }
-
-    #[test]
-    fn all_equal() {
-        let nums: Vec<u64> = (0..100_000).collect();
-        let multiple = multiple_filters(&nums);
-        let single = single_filter(&nums);
-        let single_loop = single_loop_filter(&nums);
-        let multiple_inline = multiple_filters_inline(&nums);
-        let single_inline = single_filter_inline(&nums);
-        let single_loop_inline = single_loop_filter_inline(&nums);
-
-        assert_eq!(multiple, single);
-        assert_eq!(multiple, single_loop);
-        assert_eq!(multiple, multiple_inline);
-        assert_eq!(multiple, single_inline);
-        assert_eq!(multiple, single_loop_inline);
+        assert_eq!(
+            for_loop_inline(&[0, (3 << 8) | 3, (4 << 8) | 3, (3 << 8) | 4, (6 << 8) | 3]),
+            vec![0, 3 << 8, 6 << 8]
+        )
     }
 }
