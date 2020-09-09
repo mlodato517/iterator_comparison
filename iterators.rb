@@ -74,7 +74,7 @@ def while_loop_callback(nums)
     n = nums[idx]
     if divisible_by_3?(n)
       high_bits = second_byte(n)
-      if divisible_by_3?(n)
+      if divisible_by_3?(high_bits)
         result << high_bits
       end
     end
@@ -85,7 +85,7 @@ def while_loop_callback(nums)
   result
 end
 
-small_nums = [0, (3 << 8) | 3, (4 << 8) | 3, (3 << 8) | 4, (6 << 8) | 3];
+small_nums = [0, (3 << 8) | 3, (4 << 8) + 2, (3 << 8) + 1, (6 << 8) | 3];
 expected = [0, 3 << 8, 6 << 8]
 unless  filter_map_filter_callback(small_nums) == expected  &&
      reduce_callback(small_nums) == expected  &&

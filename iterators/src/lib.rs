@@ -92,7 +92,7 @@ mod tests {
     #[test]
     fn fold_callback_works() {
         assert_eq!(
-            fold_callback(&[0, (3 << 8) | 3, (4 << 8) | 3, (3 << 8) | 4, (6 << 8) | 3]),
+            fold_callback(&[0, (3 << 8) | 3, (4 << 8) + 2, (3 << 8) + 1, (6 << 8) | 3]),
             vec![0, 3 << 8, 6 << 8]
         )
     }
@@ -100,7 +100,7 @@ mod tests {
     #[test]
     fn single_loop_works() {
         assert_eq!(
-            for_loop_callback(&[0, (3 << 8) | 3, (4 << 8) | 3, (3 << 8) | 4, (6 << 8) | 3]),
+            for_loop_callback(&[0, (3 << 8) | 3, (4 << 8) + 2, (3 << 8) + 1, (6 << 8) | 3]),
             vec![0, 3 << 8, 6 << 8]
         )
     }
@@ -108,7 +108,7 @@ mod tests {
     #[test]
     fn multiple_inline_works() {
         assert_eq!(
-            filter_map_filter_inline(&[0, (3 << 8) | 3, (4 << 8) | 3, (3 << 8) | 4, (6 << 8) | 3]),
+            filter_map_filter_inline(&[0, (3 << 8) | 3, (4 << 8) + 2, (3 << 8) + 1, (6 << 8) | 3]),
             vec![0, 3 << 8, 6 << 8]
         )
     }
@@ -116,7 +116,7 @@ mod tests {
     #[test]
     fn single_inline_works() {
         assert_eq!(
-            fold_inline(&[0, (3 << 8) | 3, (4 << 8) | 3, (3 << 8) | 4, (6 << 8) | 3]),
+            fold_inline(&[0, (3 << 8) | 3, (4 << 8) + 2, (3 << 8) + 1, (6 << 8) | 3]),
             vec![0, 3 << 8, 6 << 8]
         )
     }
@@ -124,7 +124,7 @@ mod tests {
     #[test]
     fn single_loop_inline_works() {
         assert_eq!(
-            for_loop_inline(&[0, (3 << 8) | 3, (4 << 8) | 3, (3 << 8) | 4, (6 << 8) | 3]),
+            for_loop_inline(&[0, (3 << 8) | 3, (4 << 8) + 2, (3 << 8) + 1, (6 << 8) | 3]),
             vec![0, 3 << 8, 6 << 8]
         )
     }

@@ -69,7 +69,7 @@ const forLoopCallback = (nums) => {
 };
 
 function testFunc(method) {
-  const smallNums = [0, (3 << 8) | 3, (4 << 8) | 3, (3 << 8) | 4, (6 << 8) | 3];
+  const smallNums = [0, (3 << 8) | 3, (4 << 8) + 2, (3 << 8) + 1, (6 << 8) | 3];
   const result = method(smallNums);
 
   return (
