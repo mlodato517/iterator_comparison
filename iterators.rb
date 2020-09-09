@@ -97,7 +97,7 @@ unless  filter_map_filter_callback(small_nums) == expected  &&
   return
 end
 
-nums = Array.new(100_000) { |n| n + 1 }
+nums = Array.new(100_000) { |n| n }
 
 Benchmark.bmbm do |x|
   x.report("filter-map-filter with inline functions") { filter_map_filter_inline(nums) }

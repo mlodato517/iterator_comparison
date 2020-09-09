@@ -91,7 +91,7 @@ if (
   throw new Error("One of these is wrong!");
 }
 
-let nums = Array.from(Array(100000), (_, i) => i + 1);
+let nums = Array.from(Array(100000), (_, i) => i);
 
 function timeMethod(method) {
   for (let i = 0; i < 1000; i++) {
