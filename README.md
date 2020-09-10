@@ -3,9 +3,46 @@
 A small repo to test the runtime and memory footprint of various iteration
 techniques in various languages.
 
+## Motivation
+
+When writing code that does some processing on lists, I might do something like:
+
+```
+list
+  .filter(predicate1)
+  .map(transformation)
+  .filter(predicate2)
+```
+
+This code is probably the right code to write as it's fairly readable and it defers
+`transformation` to happen after we've eliminated some values with `predicate1`.
+However I frequently wonder in the back of mind, "Does each intermediate iterator
+allocate a new array? Is this wasting time/resources?". The general answer is probably,
+"It usually doesn't matter" but I'm often tempted to change the code to something like
+
+```
+list.reduce((result, item) => {
+  if (predicate1(item)) {
+    const newItem = transformation(item)
+    if (predicate2(newItem)) {
+      result.push(newItem)
+    }
+  }
+  return result
+}, [])
+```
+
+to only allocate space for the items that make it past all the predicates. But this code
+is more difficult to read and potentially more difficult to maintain.
+
+I set out to determine how Ruby, Javascript, and Rust handle this. My assumption going in
+was that Rust's lazy iterators would delay allocation and allow me to write the idiomatic
+code without "worrying" about various performance metrics. But, as usual, there are now
+more questions than there were when I started.
+
 ## Beware
 
-This are microbenchmarks and so should not be trusted. I'm not
+These are microbenchmarks and so should not be trusted. I'm not
 confident in my ability to outsmart the compiler because
 [it's hard](https://youtu.be/g0ek4vV7nEA).
 
@@ -50,7 +87,16 @@ cd iterators
 cargo run --release | grep -v Ignore
 ```
 
-## Current Results
+and the criterion benchmarks can be run with
+
+```
+cd iterators
+cargo bench
+```
+
+Results of the benchmarks can be viewed in `target/criterion/`.
+
+## Sample Results
 
 ### Javascript
 
