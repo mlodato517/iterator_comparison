@@ -4,16 +4,16 @@ require 'memory_profiler'
 def filter_map_filter_inline(nums)
   nums
     .filter { |n| n % 3 == 0 }
-    .map { |n| n & (255 << 8) }
+    .map { |n| n / 3 }
     .filter { |n| n % 3 == 0 }
 end
 
 def reduce_inline(nums)
   nums.reduce([]) do |result, n|
     if n % 3 == 0
-      high_bits = n & (255 << 8)
-      if high_bits % 3 == 0
-        result << high_bits
+      third = n / 3
+      if third % 3 == 0
+        result << third
       end
     end
 
@@ -27,9 +27,9 @@ def while_loop_inline(nums)
   while idx < nums.length do
     n = nums[idx]
     if n % 3 == 0
-      high_bits = n & (255 << 8)
-      if high_bits % 3 == 0
-        result << high_bits
+      third = n / 3
+      if third % 3 == 0
+        result << third
       end
     end
 
@@ -43,23 +43,23 @@ def divisible_by_3?(n)
   n % 3 == 0
 end
 
-def second_byte(n)
-  n & (255 << 8)
+def divide_by_3(n)
+  n / 3
 end
 
 def filter_map_filter_callback(nums)
   nums
     .filter { |n| divisible_by_3?(n) }
-    .map { |n| second_byte(n) }
+    .map { |n| divide_by_3(n) }
     .filter { |n| divisible_by_3?(n) }
 end
 
 def reduce_callback(nums)
   nums.reduce([]) do |result, n|
     if divisible_by_3?(n)
-      high_bits = second_byte(n)
-      if divisible_by_3?(high_bits)
-        result << high_bits
+      third = divide_by_3(n)
+      if divisible_by_3?(third)
+        result << third
       end
     end
 
@@ -73,9 +73,9 @@ def while_loop_callback(nums)
   while idx < nums.length do
     n = nums[idx]
     if divisible_by_3?(n)
-      high_bits = second_byte(n)
-      if divisible_by_3?(high_bits)
-        result << high_bits
+      third = divide_by_3(n)
+      if divisible_by_3?(third)
+        result << third
       end
     end
 
@@ -85,8 +85,8 @@ def while_loop_callback(nums)
   result
 end
 
-small_nums = [0, (3 << 8) | 3, (4 << 8) + 2, (3 << 8) + 1, (6 << 8) | 3];
-expected = [0, 3 << 8, 6 << 8]
+small_nums = [0, 3, 6, 9];
+expected = [0, 3]
 unless  filter_map_filter_callback(small_nums) == expected  &&
      reduce_callback(small_nums) == expected  &&
      while_loop_callback(small_nums) == expected  &&

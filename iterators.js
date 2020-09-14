@@ -9,15 +9,15 @@ if (!global.gc) {
 const filterMapFilterInline = (nums) =>
   nums
     .filter((n) => n % 3 == 0)
-    .map((n) => n & (255 << 8))
+    .map((n) => n / 3)
     .filter((n) => n % 3 == 0);
 
 const reduceInline = (nums) =>
   nums.reduce((result, n) => {
     if (n % 3 == 0) {
-      const highBits = n & (255 << 8);
-      if (highBits % 3 == 0) {
-        result.push(highBits);
+      const third = n / 3;
+      if (third % 3 == 0) {
+        result.push(third);
       }
     }
     return result;
@@ -28,9 +28,9 @@ const forLoopInline = (nums) => {
   for (let i = 0; i < nums.length; i++) {
     n = nums[i];
     if (n % 3 == 0) {
-      const highBits = n & (255 << 8);
-      if (highBits % 3 == 0) {
-        result.push(highBits);
+      const third = n / 3;
+      if (third % 3 == 0) {
+        result.push(third);
       }
     }
   }
@@ -38,17 +38,17 @@ const forLoopInline = (nums) => {
 };
 
 const divisibleBy3 = (n) => n % 3 === 0;
-const secondByte = (n) => n & (255 << 8);
+const divideBy3 = (n) => n / 3;
 
 const filterMapFilterCallback = (nums) =>
-  nums.filter(divisibleBy3).map(secondByte).filter(divisibleBy3);
+  nums.filter(divisibleBy3).map(divideBy3).filter(divisibleBy3);
 
 const reduceCallback = (nums) =>
   nums.reduce((result, n) => {
     if (divisibleBy3(n)) {
-      const highBits = secondByte(n);
-      if (divisibleBy3(highBits)) {
-        result.push(highBits);
+      const third = divideBy3(n);
+      if (divisibleBy3(third)) {
+        result.push(third);
       }
     }
     return result;
@@ -59,9 +59,9 @@ const forLoopCallback = (nums) => {
   for (let i = 0; i < nums.length; i++) {
     n = nums[i];
     if (divisibleBy3(n)) {
-      const highBits = secondByte(n);
-      if (divisibleBy3(highBits)) {
-        result.push(highBits);
+      const third = divideBy3(n);
+      if (divisibleBy3(third)) {
+        result.push(third);
       }
     }
   }
@@ -69,15 +69,10 @@ const forLoopCallback = (nums) => {
 };
 
 function testFunc(method) {
-  const smallNums = [0, (3 << 8) | 3, (4 << 8) + 2, (3 << 8) + 1, (6 << 8) | 3];
+  const smallNums = [0, 3, 6, 9];
   const result = method(smallNums);
 
-  return (
-    result.length === 3 &&
-    result[0] === 0 &&
-    result[1] === 3 << 8 &&
-    result[2] === 6 << 8
-  );
+  return result.length === 2 && result[0] === 0 && result[1] === 3;
 }
 
 if (
