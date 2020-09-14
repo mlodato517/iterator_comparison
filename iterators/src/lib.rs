@@ -1,7 +1,7 @@
 pub fn filter_map_filter_inline(nums: &[u64]) -> Vec<u64> {
     nums.iter()
         .filter(|&&n| n % 3 == 0)
-        .map(|&n| n & (255 << 8))
+        .map(|&n| n / 3)
         .filter(|&n| n % 3 == 0)
         .collect()
 }
@@ -9,9 +9,9 @@ pub fn filter_map_filter_inline(nums: &[u64]) -> Vec<u64> {
 pub fn fold_inline(nums: &[u64]) -> Vec<u64> {
     nums.iter().fold(Vec::new(), |mut result, &n| {
         if n % 3 == 0 {
-            let high_bits = n & (255 << 8);
-            if high_bits % 3 == 0 {
-                result.push(high_bits);
+            let third = n / 3;
+            if third % 3 == 0 {
+                result.push(third);
             }
         }
         result
@@ -22,9 +22,9 @@ pub fn for_loop_inline(nums: &[u64]) -> Vec<u64> {
     let mut result = Vec::new();
     for n in nums {
         if n % 3 == 0 {
-            let high_bits = n & (255 << 8);
-            if high_bits % 3 == 0 {
-                result.push(high_bits);
+            let third = n / 3;
+            if third % 3 == 0 {
+                result.push(third);
             }
         }
     }
@@ -34,14 +34,14 @@ pub fn for_loop_inline(nums: &[u64]) -> Vec<u64> {
 fn divisible_by_3(n: u64) -> bool {
     n % 3 == 0
 }
-fn second_byte(n: u64) -> u64 {
-    n & (255 << 8)
+fn divide_by_3(n: u64) -> u64 {
+    n / 3
 }
 
 pub fn filter_map_filter_callback(nums: &[u64]) -> Vec<u64> {
     nums.iter()
         .filter(|&&n| divisible_by_3(n))
-        .map(|&n| second_byte(n))
+        .map(|&n| divide_by_3(n))
         .filter(|&n| divisible_by_3(n))
         .collect()
 }
@@ -49,9 +49,9 @@ pub fn filter_map_filter_callback(nums: &[u64]) -> Vec<u64> {
 pub fn fold_callback(nums: &[u64]) -> Vec<u64> {
     nums.iter().fold(Vec::new(), |mut result, &n| {
         if divisible_by_3(n) {
-            let high_bits = second_byte(n);
-            if divisible_by_3(high_bits) {
-                result.push(high_bits);
+            let byte = divide_by_3(n);
+            if divisible_by_3(byte) {
+                result.push(byte);
             }
         }
         result
@@ -62,9 +62,9 @@ pub fn for_loop_callback(nums: &[u64]) -> Vec<u64> {
     let mut result = Vec::new();
     for &n in nums {
         if divisible_by_3(n) {
-            let high_bits = second_byte(n);
-            if divisible_by_3(high_bits) {
-                result.push(high_bits);
+            let third = divide_by_3(n);
+            if divisible_by_3(third) {
+                result.push(third);
             }
         }
     }
@@ -75,57 +75,39 @@ pub fn for_loop_callback(nums: &[u64]) -> Vec<u64> {
 mod tests {
     use super::*;
 
+    macro_rules! test {
+        ($f:expr) => {
+            assert_eq!($f(&[0, 3, 6, 9]), vec![0, 3]);
+        };
+    }
+
     #[test]
     fn filter_map_filter_callback_works() {
-        assert_eq!(
-            filter_map_filter_callback(&[
-                0,
-                (3 << 8) | 3,
-                (4 << 8) | 3,
-                (3 << 8) | 4,
-                (6 << 8) | 3
-            ]),
-            vec![0, 3 << 8, 6 << 8]
-        )
+        test!(filter_map_filter_callback);
     }
 
     #[test]
     fn fold_callback_works() {
-        assert_eq!(
-            fold_callback(&[0, (3 << 8) | 3, (4 << 8) + 2, (3 << 8) + 1, (6 << 8) | 3]),
-            vec![0, 3 << 8, 6 << 8]
-        )
+        test!(fold_callback)
     }
 
     #[test]
     fn single_loop_works() {
-        assert_eq!(
-            for_loop_callback(&[0, (3 << 8) | 3, (4 << 8) + 2, (3 << 8) + 1, (6 << 8) | 3]),
-            vec![0, 3 << 8, 6 << 8]
-        )
+        test!(for_loop_callback);
     }
 
     #[test]
     fn multiple_inline_works() {
-        assert_eq!(
-            filter_map_filter_inline(&[0, (3 << 8) | 3, (4 << 8) + 2, (3 << 8) + 1, (6 << 8) | 3]),
-            vec![0, 3 << 8, 6 << 8]
-        )
+        test!(filter_map_filter_inline);
     }
 
     #[test]
     fn single_inline_works() {
-        assert_eq!(
-            fold_inline(&[0, (3 << 8) | 3, (4 << 8) + 2, (3 << 8) + 1, (6 << 8) | 3]),
-            vec![0, 3 << 8, 6 << 8]
-        )
+        test!(fold_inline);
     }
 
     #[test]
     fn single_loop_inline_works() {
-        assert_eq!(
-            for_loop_inline(&[0, (3 << 8) | 3, (4 << 8) + 2, (3 << 8) + 1, (6 << 8) | 3]),
-            vec![0, 3 << 8, 6 << 8]
-        )
+        test!(for_loop_inline);
     }
 }
