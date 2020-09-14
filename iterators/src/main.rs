@@ -33,6 +33,7 @@ fn main() {
     let multiple_inline_time = time_function(&nums, filter_map_filter_inline);
     let single_inline_time = time_function(&nums, fold_inline);
     let single_loop_inline_time = time_function(&nums, for_loop_inline);
+    let fold_custom_time = time_function(&nums, fold_custom);
 
     println!("Times (sec):");
     println!("{0: <20}{1:}", "Multiple:", multiple_time);
@@ -41,6 +42,7 @@ fn main() {
     println!("{0: <20}{1:}", "Multiple Inline:", multiple_inline_time);
     println!("{0: <20}{1:}", "Single Inline:", single_inline_time);
     println!("{0: <20}{1:}", "Loop Inline:", single_loop_inline_time);
+    println!("{0: <20}{1:}", "Fold Custom:", fold_custom_time);
 
     let multiple_weight = weigh_function(&nums, filter_map_filter_callback);
     let single_weight = weigh_function(&nums, fold_callback);
@@ -48,6 +50,7 @@ fn main() {
     let multiple_inline_weight = weigh_function(&nums, filter_map_filter_inline);
     let single_inline_weight = weigh_function(&nums, fold_inline);
     let single_loop_inline_weight = weigh_function(&nums, for_loop_inline);
+    let fold_custom_weight = weigh_function(&nums, fold_custom);
 
     println!("\nWeights (bytes):");
     println!("{0: <20}{1:}", "Multiple:", multiple_weight);
@@ -56,6 +59,7 @@ fn main() {
     println!("{0: <20}{1:}", "Multiple Inline:", multiple_inline_weight);
     println!("{0: <20}{1:}", "Single Inline:", single_inline_weight);
     println!("{0: <20}{1:}", "Loop Inline:", single_loop_inline_weight);
+    println!("{0: <20}{1:}", "Fold Custom:", fold_custom_weight);
 }
 
 type Func = fn(args: &[u64]) -> Vec<u64>;

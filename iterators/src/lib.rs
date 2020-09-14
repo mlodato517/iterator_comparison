@@ -18,6 +18,36 @@ pub fn fold_inline(nums: &[u64]) -> Vec<u64> {
     })
 }
 
+struct Foo<I: Iterator<Item = u64>> {
+    inner: I,
+}
+impl<I: Iterator<Item = u64>> Foo<I> {
+    fn fold_custom<F>(mut self, init: Vec<u64>, mut f: F) -> Vec<u64>
+    where
+        F: FnMut(&mut Vec<u64>, u64),
+    {
+        let mut accum = init;
+        while let Some(x) = self.inner.next() {
+            f(&mut accum, x);
+        }
+        accum
+    }
+}
+
+pub fn fold_custom(nums: &[u64]) -> Vec<u64> {
+    let foo = Foo {
+        inner: nums.iter().copied(),
+    };
+    foo.fold_custom(Vec::new(), |result, n| {
+        if n % 3 == 0 {
+            let high_bits = n & (255 << 8);
+            if high_bits % 3 == 0 {
+                result.push(high_bits);
+            }
+        }
+    })
+}
+
 pub fn for_loop_inline(nums: &[u64]) -> Vec<u64> {
     let mut result = Vec::new();
     for n in nums {
@@ -125,6 +155,14 @@ mod tests {
     fn single_loop_inline_works() {
         assert_eq!(
             for_loop_inline(&[0, (3 << 8) | 3, (4 << 8) + 2, (3 << 8) + 1, (6 << 8) | 3]),
+            vec![0, 3 << 8, 6 << 8]
+        )
+    }
+
+    #[test]
+    fn fold_custom_works() {
+        assert_eq!(
+            fold_custom(&[0, (3 << 8) | 3, (4 << 8) + 2, (3 << 8) + 1, (6 << 8) | 3]),
             vec![0, 3 << 8, 6 << 8]
         )
     }
