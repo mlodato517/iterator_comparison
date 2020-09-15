@@ -32,6 +32,15 @@ impl<I: Iterator<Item = u64>> Foo<I> {
         }
         accum
     }
+    fn fold_custom_2<F>(self, init: Vec<u64>, mut f: F) -> Vec<u64>
+    where
+        F: FnMut(&mut Vec<u64>, u64),
+    {
+        self.inner.fold(init, |mut acc, x| {
+            f(&mut acc, x);
+            acc
+        })
+    }
 }
 
 pub fn fold_custom(nums: &[u64]) -> Vec<u64> {
@@ -39,6 +48,19 @@ pub fn fold_custom(nums: &[u64]) -> Vec<u64> {
         inner: nums.iter().copied(),
     };
     foo.fold_custom(Vec::new(), |result, n| {
+        if n % 3 == 0 {
+            let high_bits = n & (255 << 8);
+            if high_bits % 3 == 0 {
+                result.push(high_bits);
+            }
+        }
+    })
+}
+pub fn fold_custom_2(nums: &[u64]) -> Vec<u64> {
+    let foo = Foo {
+        inner: nums.iter().copied(),
+    };
+    foo.fold_custom_2(Vec::new(), |result, n| {
         if n % 3 == 0 {
             let high_bits = n & (255 << 8);
             if high_bits % 3 == 0 {
